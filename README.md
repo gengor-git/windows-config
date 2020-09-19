@@ -1,4 +1,5 @@
 # windows-config
+
 Scripts and configs for my Windows environment
 
 ## Features
@@ -6,3 +7,5 @@ Scripts and configs for my Windows environment
 - Create Download directory (if not present)
 - Download Pandoc (portable zip)
 - Download MiKTeX (installer)
+- Unzip Pandoc
+- Add Pandoc to path variable

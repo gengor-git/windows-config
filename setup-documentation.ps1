@@ -1,5 +1,5 @@
 <#
-Installer to setup MikTeX-Environment, Pandoc and matching environment variables.
+Installer to setup MiKTeX-Environment, Pandoc and matching environment variables.
 Currently Work-in-Progress.
 #>
 
@@ -14,7 +14,7 @@ $target_pandoc_folder = "$target_root_folder\pandoc"
 
 $miktex_installer = "$download_folder\miktex-portable.exe"
 $miktex_download_uri = "https://miktex.org/download/ctan/systems/win32/miktex/setup/windows-x64/basic-miktex-20.6.29-x64.exe"
-$miktext_install_params = "--portable=`"$target_miktex_folder`" --auto-install=yes --unattended"
+$miktex_install_params = "--portable=`"$target_miktex_folder`" --auto-install=yes --unattended"
 $target_miktex_path = "C:\Portable\miktex\texmfs\install\miktex\bin\x64"
 $target_pandoc_path = ""
 
@@ -42,6 +42,22 @@ if ($do_pandoc) {
         $dl.DownloadFile($pandoc_download_uri, $pandoc_installer)
         Write-Host "done."
     }
+    else {
+        $answer = Read-Host "Download and overwrite? ( y / n )"
+        switch ($answer) {
+            Y {
+                Write-Host "Downloading Pandoc portable zip ... " -NoNewline
+                $dl.DownloadFile($pandoc_download_uri, $pandoc_installer)
+                Write-Host "done."
+            }
+            N {
+
+            }
+            Default {
+
+            }
+        }
+    }
     Write-Host "Unzipping Pandoc ..." -NoNewline
     Expand-Archive -Path $pandoc_installer -DestinationPath $target_pandoc_folder -Force
     Write-Host "done."
@@ -59,12 +75,28 @@ if ($do_pandoc) {
 if ($do_miktex) {
     Write-Host "====MIKTEX===="
     if (-not (Test-Path -Path $miktex_installer)) {
-        Write-Host "Downloading MikTeX installer ... " -NoNewline
+        Write-Host "Downloading MiKTeX installer ... " -NoNewline
         $dl.DownloadFile($miktex_download_uri, $miktex_installer)
         Write-Host "done."
     }
+    else {
+        $answer = Read-Host "Download and overwrite? ( y / n )"
+        switch ($answer) {
+            Y {
+                Write-Host "Downloading MiKTeX installer ... " -NoNewline
+                $dl.DownloadFile($miktex_download_uri, $miktex_installer)
+                Write-Host "done."
+            }
+            N {
+
+            }
+            Default {
+
+            }
+        }
+    }
     Write-Host "Installing MiKTeX as portable ... " -NoNewline
-    #Start-Process -FilePath $miktex_installer -ArgumentList $miktext_install_params -NoNewWindow -Wait
+    Start-Process -FilePath $miktex_installer -ArgumentList $miktex_install_params -NoNewWindow -Wait
     Write-Host "done."
 
     if ($user_path.Contains($target_miktex_path)) {
@@ -75,8 +107,6 @@ if ($do_miktex) {
         $user_path += ";" + $target_miktex_path
     }
 }
-
-
 
 # Save all the changes to the path environment for the user.
 Write-Host "Save path environment ... " -NoNewline

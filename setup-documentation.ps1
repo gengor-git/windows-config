@@ -77,24 +77,25 @@ if (Test-Path -Path $target_pandoc_folder) {
 }
 
 # Check if we have the latest download version in our links above
-# MiKTeX download page is at https://miktex.org/download/
-$mkd = Invoke-WebRequest -Uri "https://miktex.org/download/" -UseBasicParsing
-$mkdl = $mkd.Links.href | ? {$_ -match "basic.*64"}
-$mkdl = "https://miktex.org/" + $mkdl[0]
-if (-not ($miktex_download_uri -eq $mkdl)) {
-    Write-Warning "Never version avaiable online: $mkdl"
-    Write-Host "Will use that version for download."
-    $miktex_download_uri = $mkdl
-}
 # Pandoc download page is at https://github.com/jgm/pandoc/releases/latest
-$pdd = Invoke-WebRequest -Uri "https://github.com/jgm/pandoc/releases/latest" -UseBasicParsing
-$pddl = $pdd.Links.href | ? {$_ -match "64\.zip"}
-Write-Host $pddl
-$pddl = "https://github.com" + $pddl
-if (-not ($pandoc_download_uri -eq $pddl)) {
-    Write-Warning "Never version avaiable online: $pddl"
-    Write-Host "Will use that version for download."
-    $pandoc_download_uri = $pddl
+$web_pandoc_dl_page = Invoke-WebRequest -Uri "https://github.com/jgm/pandoc/releases/latest" -UseBasicParsing
+$web_pandoc_dl_page_links = $web_pandoc_dl_page.Links.href | Where-Object {$_ -match "64\.zip"}
+# Pandoc typically has only one zip with 64 bit for Windows.
+$web_pandoc_download_uri = "https://github.com" + $web_pandoc_dl_page_links
+if (-not ($pandoc_download_uri -eq $web_pandoc_download_uri)) {
+    Write-Warning "Pandoc: Never version avaiable online: $web_pandoc_download_uri"
+    Write-Host "Pandoc: Will use that version for download."
+    $pandoc_download_uri = $web_pandoc_download_uri
+}
+# MiKTeX download page is at https://miktex.org/download/
+$web_miktex_dl_page = Invoke-WebRequest -Uri "https://miktex.org/download/" -UseBasicParsing
+# MiKTeX has the same download link twice on the page, hence the filter to unique.
+$web_miktex_dl_page_links = $web_miktex_dl_page.Links.href | Where-Object {$_ -match "basic.*64"} | Select-Object -Unique
+$web_miktex_download_uri = "https://miktex.org/" + $web_miktex_dl_page_links
+if (-not ($miktex_download_uri -eq $web_miktex_download_uri)) {
+    Write-Warning "MiKTeX: Never version avaiable online: $web_miktex_download_uri"
+    Write-Host "MiKTeX: Will use that version for download."
+    $miktex_download_uri = $web_miktex_download_uri
 }
 
 
@@ -184,6 +185,6 @@ if ($path_changed) {
 }
 
 
-Write-Host "/==================\"
+Write-Host "+==================+"
 Write-Host "| Script finished. |"
-Write-Host "\==================/"
+Write-Host "+==================+"

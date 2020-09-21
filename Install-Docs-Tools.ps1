@@ -8,7 +8,7 @@ $do_pandoc = $true
 $do_miktex = $true
 # python is not really needed, so it defaults to "NO"
 $do_python = $false # As is, there's a separate question prior to installing python. This value is not used, yet!
-# Don't actually unszip or install anything. Downloads will still be done.
+# Don't actually unzip or install anything. Downloads will still be done.
 $dryrun = $false
 
 $download_folder = "$env:USERPROFILE\Downloads\documentation-downloads"

@@ -8,6 +8,8 @@ $do_pandoc = $true
 $do_miktex = $true
 # python is not really needed, so it defaults to "NO"
 $do_python = $false # As is, there's a separate question prior to installing python. This value is not used, yet!
+# Don't actually unszip or install anything. Downloads will still be done.
+$dryrun = $false
 
 $download_folder = "$env:USERPROFILE\Downloads\documentation-downloads"
 
@@ -141,7 +143,7 @@ if ($do_pandoc) {
         }
     }
     Write-Host "Unzipping Pandoc ..." -NoNewline
-    Expand-Archive -Path $pandoc_installer -DestinationPath $target_pandoc_folder -Force
+    if (-not ($dryrun)) { Expand-Archive -Path $pandoc_installer -DestinationPath $target_pandoc_folder -Force }
     Write-Host "done."
     # Pandoc unzips with a separate folder and that folder must be added
     # to the path instead of the above mentioned target path for pandoc.
@@ -189,7 +191,7 @@ if ($do_miktex) {
         }
     }
     Write-Host "Installing MiKTeX as portable ... " -NoNewline
-    Start-Process -FilePath $miktex_installer -ArgumentList $miktex_install_params -NoNewWindow -Wait
+    if (-not ($dryrun)) { Start-Process -FilePath $miktex_installer -ArgumentList $miktex_install_params -NoNewWindow -Wait }
     Write-Host "done."
 
     if ($user_path.Contains($target_miktex_path)) {
@@ -224,7 +226,7 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
                 $python_download_uri = $web_python_download_uri
             }
             Download-Installer -DownloadSource $python_download_uri -DownloadTargetFile $python_installer -DownloadName "Python"
-            Start-Process -FilePath $python_installer -ArgumentList $python_install_params -NoNewWindow -Wait
+            if (-not ($dryrun)) { Start-Process -FilePath $python_installer -ArgumentList $python_install_params -NoNewWindow -Wait }
         }
     }
 }
@@ -233,7 +235,7 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
 # Save all the changes to the path environment for the user.
 if ($path_changed) {
     Write-Host "Save path environment ... " -NoNewline
-    [System.Environment]::SetEnvironmentVariable("Path", $user_path, "User")
+    if (-not ($dryrun)) { [System.Environment]::SetEnvironmentVariable("Path", $user_path, "User") }
     Write-Host "done."
 }
 

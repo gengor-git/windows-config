@@ -94,26 +94,30 @@ if ($do_pandoc) {
             Y {
                 Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
             }
-            N {
-
-            }
-            Default {
-
-            }
         }
     }
     Write-Host "Unzipping Pandoc ..." -NoNewline
     Expand-Archive -Path $pandoc_installer -DestinationPath $target_pandoc_folder -Force
     Write-Host "done."
-    $pandoc_subfolder = Get-ChildItem -Path $target_pandoc_folder
-    $target_pandoc_path = $target_pandoc_folder + "\" + $pandoc_subfolder[0].name 
+    # Pandoc unzips with a separate folder and that folder must be added
+    # to the path instead of the above mentioned target path for pandoc.
+    # Thus we look for it here. If there's more than one folder, it is
+    # using the most recent one based on last write time.
+    $pandoc_subfolder = Get-ChildItem -Path $target_pandoc_folder | Sort-Object -Property LastWriteTime
+    $target_pandoc_path = $target_pandoc_folder + "\" + $pandoc_subfolder[-1].name 
     if ($user_path.Contains($target_pandoc_path)) {
-        Write-Warning "Pandoc is already in the PATH. Check if this is correct!"
+        Write-Warning "Pandoc is already in the PATH."
     }
     else {
         Write-Host "Will add Pandoc to PATH variable and save later."
         $user_path += ";" + $target_pandoc_path
         $path_changed = $true
+    }
+    # Check if there's maybe old pandoc stuff in the path.
+    $count_pandoc_in_path = ($user_path.Split(";") | Where-Object {$_ -match "pandoc"}).Count
+    if ($count_pandoc_in_path -gt 1) {
+        Write-Warning "You have Pandoc in your path more than once. Please fix this manually to avoid errors."
+        $user_path.Split(";") | Where-Object {$_ -match "pandoc"} | Write-Warning
     }
 }
 
@@ -128,12 +132,6 @@ if ($do_miktex) {
             Y {
                 Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
             }
-            N {
-
-            }
-            Default {
-
-            }
         }
     }
     Write-Host "Installing MiKTeX as portable ... " -NoNewline
@@ -141,13 +139,18 @@ if ($do_miktex) {
     Write-Host "done."
 
     if ($user_path.Contains($target_miktex_path)) {
-        Write-Warning "MiKTeX already in PATH. Check if this is correct!"
+        Write-Warning "MiKTeX already in PATH."
     }
     else {
         Write-Host "Will add MiKTeX bin to PATH variable and save later."
         $user_path += ";" + $target_miktex_path
         $path_changed = $true
     }
+    $count_miktex_in_path = ($user_path.Split(";") | Where-Object {$_ -match "miktex"}).Count
+    if ($count_miktex_in_path -gt 1) {
+        Write-Warning "You have MiKTeX in your path more than once! Please fix this manually to avoid errors."
+        $user_path.Split(";") | Where-Object {$_ -match "miktex"} | Write-Warning
+    }    
 }
 
 # Save all the changes to the path environment for the user.
@@ -158,5 +161,6 @@ if ($path_changed) {
 }
 
 
-Write-Host "================"
-Write-Host "Script finished."
+Write-Host "/==================\"
+Write-Host "| Script finished. |"
+Write-Host "\==================/"

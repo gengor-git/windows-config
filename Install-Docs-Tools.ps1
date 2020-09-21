@@ -11,21 +11,28 @@ $do_python = $false # As is, there's a separate question prior to installing pyt
 
 $download_folder = "$env:USERPROFILE\Downloads\documentation-downloads"
 
+# This is were the manual installed software will end up on your machine.
 $target_root_folder = "C:\Portable"
 $target_miktex_folder = "$target_root_folder\miktex"
 $target_pandoc_folder = "$target_root_folder\pandoc"
 
-$pandoc_installer = "$download_folder\pandoc-2.10.1-windows-x86_64.zip"
+$pandoc_installer = "$download_folder\pandoc.zip"
+$pandoc_base_uri = "https://github.com/jgm/pandoc/releases/latest"
+$pandoc_installer_pattern = "64\.zip"
 $pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10/pandoc-2.10-windows-x86_64.zip"
 #https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
+$target_pandoc_path = ""
 
 $miktex_installer = "$download_folder\miktex-portable.exe"
+$miktex_base_uri = "https://miktex.org/download/"
+$miktex_installer_pattern = "basic.*64"
 $miktex_download_uri = "https://miktex.org/download/ctan/systems/win32/miktex/setup/windows-x64/basic-miktex-20.6.29-x64.exe"
 $miktex_install_params = "--portable=`"$target_miktex_folder`" --auto-install=yes --unattended"
 $target_miktex_path = "$target_miktex_folder\texmfs\install\miktex\bin\x64"
-$target_pandoc_path = ""
 
 $python_installer = "$download_folder\python-setup.exe"
+$python_base_uri = "https://www.python.org/downloads/"
+$python_installer_pattern = "\.exe"
 $python_download_uri = "https://www.python.org/ftp/python/3.8.5/python-3.8.5.exe"
 $python_install_params = "/passive /InstallAllUsers=0"
 
@@ -57,6 +64,25 @@ function Download-Installer {
     $web.DownloadFile($DownloadSource, $DownloadTargetFile)
     Write-Host "complete."
     Write-Host "File saved to $DownloadTargetFile."
+}
+
+
+function Get-LatestDownload {
+  param (
+    [Parameter(Mandatory=$true)]
+    [String]
+    $BaseUri,
+    [Parameter(Mandatory=$true)]
+    [String]
+    $SearchPattern
+  )
+  $site = Invoke-WebRequest -Uri $BaseUri -UseBasicParsing
+  $dl_links = $site.Links.href | Where-Object {$_ -match $SearchPattern} | Select-Object -Unique
+  if (-not ($dl_links -match "$\/")) {
+    $domain = $BaseUri.Split("/")[2]
+    $dl_links = "https://$domain$dl_links"
+  }
+  return $dl_links
 }
 
 Get-Content -Path "titleascii-install-docs-tools.txt" | Write-Host
@@ -94,13 +120,10 @@ if (Test-Path -Path $download_folder) {
 if ($do_pandoc) {
     Write-Host "====PANDOC===="
 
-    # Check if we have the latest download version in our links above
+    # Check if we have the latest download version in our links above.
     Write-Host "Checking available Pandoc version online."
     # Pandoc download page is at https://github.com/jgm/pandoc/releases/latest
-    $web_pandoc_dl_page = Invoke-WebRequest -Uri "https://github.com/jgm/pandoc/releases/latest" -UseBasicParsing
-    $web_pandoc_dl_page_links = $web_pandoc_dl_page.Links.href | Where-Object {$_ -match "64\.zip"}
-    # Pandoc typically has only one zip with 64 bit for Windows.
-    $web_pandoc_download_uri = "https://github.com" + $web_pandoc_dl_page_links
+    $web_pandoc_download_uri = Get-LatestDownload -BaseUri $pandoc_base_uri -SearchPattern $pandoc_installer_pattern
     if (-not ($pandoc_download_uri -eq $web_pandoc_download_uri)) {
         Write-Warning "Pandoc: Never version avaiable online: $web_pandoc_download_uri"
         Write-Host "Pandoc: Script will use that version for download."
@@ -145,12 +168,9 @@ if ($do_pandoc) {
 if ($do_miktex) {
     Write-Host "====MIKTEX===="
 
+    # Check if we have the latest download version in our links above.
     Write-Host "Checking available versions online."
-    # MiKTeX download page is at https://miktex.org/download/
-    $web_miktex_dl_page = Invoke-WebRequest -Uri "https://miktex.org/download/" -UseBasicParsing
-    # MiKTeX has the same download link twice on the page, hence the filter to unique.
-    $web_miktex_dl_page_links = $web_miktex_dl_page.Links.href | Where-Object {$_ -match "basic.*64"} | Select-Object -Unique
-    $web_miktex_download_uri = "https://miktex.org" + $web_miktex_dl_page_links
+    $web_miktex_download_uri = Get-LatestDownload -BaseUri $miktex_base_uri -SearchPattern $miktex_installer_pattern
     if (-not ($miktex_download_uri -eq $web_miktex_download_uri)) {
         Write-Warning "MiKTeX: Never version avaiable online: $web_miktex_download_uri"
         Write-Host "MiKTeX: Script will use that version for download."
@@ -194,11 +214,9 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
     $answer = Read-Host "Do you want to install Python now? ( y / n )"
     switch ($answer) {
         Y {
-            $python_base_uri = "https://www.python.org/downloads/"
-
             $web_python_dl_page = Invoke-WebRequest -Uri $python_base_uri -UseBasicParsing
             # python has the same download link twice on the page, hence the filter to unique.
-            $web_python_dl_page_links = $web_python_dl_page.Links.href | Where-Object {$_ -match "\.exe"} | Select-Object -Unique
+            $web_python_dl_page_links = $web_python_dl_page.Links.href | Where-Object {$_ -match $python_installer_pattern} | Select-Object -Unique
             $web_python_download_uri = $web_python_dl_page_links
             if (-not ($python_download_uri -eq $web_python_download_uri)) {
                 Write-Warning "Python: Never version avaiable online: $web_python_download_uri"

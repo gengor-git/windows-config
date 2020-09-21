@@ -3,8 +3,11 @@ Installer to setup MiKTeX-Environment, Pandoc and matching environment variables
 Currently Work-in-Progress.
 #>
 
+# Reasonable defauls what to install and what not.
 $do_pandoc = $true
 $do_miktex = $true
+# python is not really needed, so it defaults to "NO"
+$do_python = $false
 
 $download_folder = "$env:USERPROFILE\Downloads\documentation-downloads"
 
@@ -12,15 +15,19 @@ $target_root_folder = "C:\Portable"
 $target_miktex_folder = "$target_root_folder\miktex"
 $target_pandoc_folder = "$target_root_folder\pandoc"
 
+$pandoc_installer = "$download_folder\pandoc-2.10.1-windows-x86_64.zip"
+$pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10/pandoc-2.10-windows-x86_64.zip"
+#https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
+
 $miktex_installer = "$download_folder\miktex-portable.exe"
 $miktex_download_uri = "https://miktex.org/download/ctan/systems/win32/miktex/setup/windows-x64/basic-miktex-20.6.29-x64.exe"
 $miktex_install_params = "--portable=`"$target_miktex_folder`" --auto-install=yes --unattended"
 $target_miktex_path = "$target_miktex_folder\texmfs\install\miktex\bin\x64"
 $target_pandoc_path = ""
 
-$pandoc_installer = "$download_folder\pandoc-2.10.1-windows-x86_64.zip"
-$pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10/pandoc-2.10-windows-x86_64.zip"
-#https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
+$python_installer = "$download_folder\python-setup.exe"
+$python_download_uri = "https://www.python.org/ftp/python/3.8.5/python-3.8.5.exe"
+$python_install_params = "/passive /InstallAllUsers=0"
 
 $user_path = [System.Environment]::GetEnvironmentVariable("Path", "User")
 $path_changed = $false
@@ -56,7 +63,7 @@ Get-Content -Path titleascii.txt | Write-Host
 
 # Fail-Safe
 if ((Test-Path -Path $target_pandoc_folder) -or (Get-Command -Name "pandoc.exe" -ErrorAction SilentlyContinue)) {
-    Write-Warning "Pandoc folder already present. Suggesting to skip install."
+    Write-Warning "Pandoc install seems already present. Suggesting to skip install."
     $do_pandoc = $false
     $answer = Read-Host "Reinstall anyway? ( y / n )"
     switch($answer) {
@@ -76,29 +83,6 @@ if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosol
     }
 }
 
-# Check if we have the latest download version in our links above
-# Pandoc download page is at https://github.com/jgm/pandoc/releases/latest
-$web_pandoc_dl_page = Invoke-WebRequest -Uri "https://github.com/jgm/pandoc/releases/latest" -UseBasicParsing
-$web_pandoc_dl_page_links = $web_pandoc_dl_page.Links.href | Where-Object {$_ -match "64\.zip"}
-# Pandoc typically has only one zip with 64 bit for Windows.
-$web_pandoc_download_uri = "https://github.com" + $web_pandoc_dl_page_links
-if (-not ($pandoc_download_uri -eq $web_pandoc_download_uri)) {
-    Write-Warning "Pandoc: Never version avaiable online: $web_pandoc_download_uri"
-    Write-Host "Pandoc: Will use that version for download."
-    $pandoc_download_uri = $web_pandoc_download_uri
-}
-# MiKTeX download page is at https://miktex.org/download/
-$web_miktex_dl_page = Invoke-WebRequest -Uri "https://miktex.org/download/" -UseBasicParsing
-# MiKTeX has the same download link twice on the page, hence the filter to unique.
-$web_miktex_dl_page_links = $web_miktex_dl_page.Links.href | Where-Object {$_ -match "basic.*64"} | Select-Object -Unique
-$web_miktex_download_uri = "https://miktex.org" + $web_miktex_dl_page_links
-if (-not ($miktex_download_uri -eq $web_miktex_download_uri)) {
-    Write-Warning "MiKTeX: Never version avaiable online: $web_miktex_download_uri"
-    Write-Host "MiKTeX: Will use that version for download."
-    $miktex_download_uri = $web_miktex_download_uri
-}
-
-
 # Download directory needs to be present to store the installers.
 if (Test-Path -Path $download_folder) {
     Write-Host "Download directory exists."
@@ -109,11 +93,24 @@ if (Test-Path -Path $download_folder) {
 
 if ($do_pandoc) {
     Write-Host "====PANDOC===="
+
+    # Check if we have the latest download version in our links above
+    Write-Host "Checking available Pandoc version online."
+    # Pandoc download page is at https://github.com/jgm/pandoc/releases/latest
+    $web_pandoc_dl_page = Invoke-WebRequest -Uri "https://github.com/jgm/pandoc/releases/latest" -UseBasicParsing
+    $web_pandoc_dl_page_links = $web_pandoc_dl_page.Links.href | Where-Object {$_ -match "64\.zip"}
+    # Pandoc typically has only one zip with 64 bit for Windows.
+    $web_pandoc_download_uri = "https://github.com" + $web_pandoc_dl_page_links
+    if (-not ($pandoc_download_uri -eq $web_pandoc_download_uri)) {
+        Write-Warning "Pandoc: Never version avaiable online: $web_pandoc_download_uri"
+        Write-Host "Pandoc: Will use that version for download."
+        $pandoc_download_uri = $web_pandoc_download_uri
+    }
     if (-not (Test-Path -Path $pandoc_installer)) {
         Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
     }
     else {
-        $answer = Read-Host "Download and overwrite? ( y / n )"
+        $answer = Read-Host "Download exists. Re-download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
                 Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
@@ -147,6 +144,19 @@ if ($do_pandoc) {
 
 if ($do_miktex) {
     Write-Host "====MIKTEX===="
+
+    Write-Host "Checking available versions online."
+    # MiKTeX download page is at https://miktex.org/download/
+    $web_miktex_dl_page = Invoke-WebRequest -Uri "https://miktex.org/download/" -UseBasicParsing
+    # MiKTeX has the same download link twice on the page, hence the filter to unique.
+    $web_miktex_dl_page_links = $web_miktex_dl_page.Links.href | Where-Object {$_ -match "basic.*64"} | Select-Object -Unique
+    $web_miktex_download_uri = "https://miktex.org" + $web_miktex_dl_page_links
+    if (-not ($miktex_download_uri -eq $web_miktex_download_uri)) {
+        Write-Warning "MiKTeX: Never version avaiable online: $web_miktex_download_uri"
+        Write-Host "MiKTeX: Will use that version for download."
+        $miktex_download_uri = $web_miktex_download_uri
+    }
+
     if (-not (Test-Path -Path $miktex_installer)) {
         Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
     }
@@ -175,6 +185,30 @@ if ($do_miktex) {
         Write-Warning "You have MiKTeX in your path more than once! Please fix this manually to avoid errors."
         $user_path.Split(";") | Where-Object {$_ -match "miktex"} | Write-Warning
     }    
+}
+
+
+# Optional stuff: Python
+if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
+    Write-Host "You don't seem to have Python installed."
+    $answer = Read-Host "Do you want to install Python now? ( y / n )"
+    switch ($answer) {
+        Y {
+            $python_base_uri = "https://www.python.org/downloads/"
+
+            $web_python_dl_page = Invoke-WebRequest -Uri $python_base_uri -UseBasicParsing
+            # python has the same download link twice on the page, hence the filter to unique.
+            $web_python_dl_page_links = $web_python_dl_page.Links.href | Where-Object {$_ -match "\.exe"} | Select-Object -Unique
+            $web_python_download_uri = $web_python_dl_page_links
+            if (-not ($python_download_uri -eq $web_python_download_uri)) {
+                Write-Warning "Python: Never version avaiable online: $web_python_download_uri"
+                Write-Host "Python: Will use that version for download."
+                $python_download_uri = $web_python_download_uri
+            }
+            Download-Installer -DownloadSource $python_download_uri -DownloadTargetFile $python_installer -DownloadName "Python"
+            Start-Process -FilePath $python_installer -ArgumentList $python_install_params -NoNewWindow -Wait
+        }
+    }
 }
 
 # Save all the changes to the path environment for the user.

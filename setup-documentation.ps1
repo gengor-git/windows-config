@@ -15,7 +15,7 @@ $target_pandoc_folder = "$target_root_folder\pandoc"
 $miktex_installer = "$download_folder\miktex-portable.exe"
 $miktex_download_uri = "https://miktex.org/download/ctan/systems/win32/miktex/setup/windows-x64/basic-miktex-20.6.29-x64.exe"
 $miktex_install_params = "--portable=`"$target_miktex_folder`" --auto-install=yes --unattended"
-$target_miktex_path = "C:\Portable\miktex\texmfs\install\miktex\bin\x64"
+$target_miktex_path = "$target_miktex_folder\texmfs\install\miktex\bin\x64"
 $target_pandoc_path = ""
 
 $pandoc_installer = "$download_folder\pandoc-2.10.1-windows-x86_64.zip"

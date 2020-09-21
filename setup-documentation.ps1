@@ -22,6 +22,7 @@ $pandoc_installer = "$download_folder\pandoc-2.10.1-windows-x86_64.zip"
 $pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
 
 $user_path = [System.Environment]::GetEnvironmentVariable("Path", "User")
+$path_changed = $false
 
 function Download-Installer {
     Param (
@@ -50,17 +51,29 @@ function Download-Installer {
     Write-Host "File saved to $DownloadTargetFile."
 }
 
+Get-Content -Path titleascii.txt | Write-Host
 
 # Fail-Safe
-if (Test-Path -Path "C:\Portable\miktex") {
-    Write-Warning "MiKTeX folder already present. Skipping install for MiKTeX."
+if (Test-Path -Path $target_miktex_folder) {
+    Write-Warning "MiKTeX folder already present. Suggesting to skip install."
     $do_miktex = $false
+    $answer = Read-Host "Reinstall anyway? ( y / n )"
+    switch($answer) {
+        Y {
+            $do_miktex = $true
+        }
+    }
 }
-if (Test-Path -Path "C:\Portable\pandoc") {
-    Write-Warning "Pandoc folder already present. Skipping install for Pandoc."
+if (Test-Path -Path $target_pandoc_folder) {
+    Write-Warning "Pandoc folder already present. Suggesting to skip install."
     $do_pandoc = $false
+    $answer = Read-Host "Reinstall anyway? ( y / n )"
+    switch($answer) {
+        Y {
+            $do_pandoc = $true
+        }
+    }
 }
-
 
 # Download directory needs to be present to store the installers.
 if (Test-Path -Path $download_folder) {
@@ -69,9 +82,6 @@ if (Test-Path -Path $download_folder) {
     Write-Host "Download directory does not exist. Creating new one at $download_folder."
     New-Item -Path $download_folder -ItemType Directory 
 }
-
-# Download web client, because Invoke-WebRequest is too slow.
-$dl = New-Object System.Net.WebClient
 
 if ($do_pandoc) {
     Write-Host "====PANDOC===="
@@ -103,6 +113,7 @@ if ($do_pandoc) {
     else {
         Write-Host "Will add Pandoc to PATH variable and save later."
         $user_path += ";" + $target_pandoc_path
+        $path_changed = $true
     }
 }
 
@@ -135,10 +146,17 @@ if ($do_miktex) {
     else {
         Write-Host "Will add MiKTeX bin to PATH variable and save later."
         $user_path += ";" + $target_miktex_path
+        $path_changed = $true
     }
 }
 
 # Save all the changes to the path environment for the user.
-Write-Host "Save path environment ... " -NoNewline
-[System.Environment]::SetEnvironmentVariable("Path", $user_path, "User")
-Write-Host "done."
+if ($path_changed) {
+    Write-Host "Save path environment ... " -NoNewline
+    [System.Environment]::SetEnvironmentVariable("Path", $user_path, "User")
+    Write-Host "done."
+}
+
+
+Write-Host "================"
+Write-Host "Script finished."

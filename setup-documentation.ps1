@@ -23,11 +23,37 @@ $pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10.1/p
 
 $user_path = [System.Environment]::GetEnvironmentVariable("Path", "User")
 
+function Download-Installer {
+    Param (
+        [Parameter(Mandatory=$true)]
+        [String]
+        $DownloadSource,
+
+        [Parameter(Mandatory=$true)]
+        [String]
+        $DownloadTargetFile,
+
+        [Parameter(Mandatory=$false)]
+        [String]
+        $DownloadName
+    )
+
+    if(-not ($DownloadName)) {
+      $SourceName = $DownloadSource
+    } else {
+      $SourceName = "$DownloadName from $DownloadSource"
+    }
+    $web = New-Object System.Net.WebClient
+    Write-Host "Downloading $SourceName ... " -NoNewline
+    $web.DownloadFile($DownloadSource, $DownloadTargetFile)
+    Write-Host "complete."
+    Write-Host "File saved to $DownloadTargetFile."
+}
+
 # Download directory needs to be present to store the installers.
 if (Test-Path -Path $download_folder) {
     Write-Host "Download directory exists."
-}
-else {
+} else {
     Write-Host "Download directory does not exist. Creating new one at $download_folder."
     New-Item -Path $download_folder -ItemType Directory 
 }
@@ -38,17 +64,13 @@ $dl = New-Object System.Net.WebClient
 if ($do_pandoc) {
     Write-Host "====PANDOC===="
     if (-not (Test-Path -Path $pandoc_installer)) {
-        Write-Host "Downloading Pandoc portable zip ... " -NoNewline
-        $dl.DownloadFile($pandoc_download_uri, $pandoc_installer)
-        Write-Host "done."
+        Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
     }
     else {
         $answer = Read-Host "Download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
-                Write-Host "Downloading Pandoc portable zip ... " -NoNewline
-                $dl.DownloadFile($pandoc_download_uri, $pandoc_installer)
-                Write-Host "done."
+                Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
             }
             N {
 
@@ -75,17 +97,13 @@ if ($do_pandoc) {
 if ($do_miktex) {
     Write-Host "====MIKTEX===="
     if (-not (Test-Path -Path $miktex_installer)) {
-        Write-Host "Downloading MiKTeX installer ... " -NoNewline
-        $dl.DownloadFile($miktex_download_uri, $miktex_installer)
-        Write-Host "done."
+        Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
     }
     else {
         $answer = Read-Host "Download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
-                Write-Host "Downloading MiKTeX installer ... " -NoNewline
-                $dl.DownloadFile($miktex_download_uri, $miktex_installer)
-                Write-Host "done."
+                Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
             }
             N {
 

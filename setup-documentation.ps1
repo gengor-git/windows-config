@@ -50,6 +50,18 @@ function Download-Installer {
     Write-Host "File saved to $DownloadTargetFile."
 }
 
+
+# Fail-Safe
+if (Test-Path -Path "C:\Portable\miktex") {
+    Write-Warning "MiKTeX folder already present. Skipping install for MiKTeX."
+    $do_miktex = $false
+}
+if (Test-Path -Path "C:\Portable\pandoc") {
+    Write-Warning "Pandoc folder already present. Skipping install for Pandoc."
+    $do_pandoc = $false
+}
+
+
 # Download directory needs to be present to store the installers.
 if (Test-Path -Path $download_folder) {
     Write-Host "Download directory exists."

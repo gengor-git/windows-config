@@ -55,16 +55,6 @@ function Download-Installer {
 Get-Content -Path titleascii.txt | Write-Host
 
 # Fail-Safe
-if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosole.exe" -ErrorAction SilentlyContinue)) {
-    Write-Warning "MiKTeX install seems already present. Suggesting to skip install."
-    $do_miktex = $false
-    $answer = Read-Host "Reinstall anyway? ( y / n )"
-    switch($answer) {
-        Y {
-            $do_miktex = $true
-        }
-    }
-}
 if ((Test-Path -Path $target_pandoc_folder) -or (Get-Command -Name "pandoc.exe" -ErrorAction SilentlyContinue)) {
     Write-Warning "Pandoc folder already present. Suggesting to skip install."
     $do_pandoc = $false
@@ -72,6 +62,16 @@ if ((Test-Path -Path $target_pandoc_folder) -or (Get-Command -Name "pandoc.exe" 
     switch($answer) {
         Y {
             $do_pandoc = $true
+        }
+    }
+}
+if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosole.exe" -ErrorAction SilentlyContinue)) {
+    Write-Warning "MiKTeX install seems already present. Suggesting to skip install."
+    $do_miktex = $false
+    $answer = Read-Host "Reinstall anyway? ( y / n )"
+    switch($answer) {
+        Y {
+            $do_miktex = $true
         }
     }
 }

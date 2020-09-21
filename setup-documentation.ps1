@@ -55,8 +55,8 @@ function Download-Installer {
 Get-Content -Path titleascii.txt | Write-Host
 
 # Fail-Safe
-if (Test-Path -Path $target_miktex_folder) {
-    Write-Warning "MiKTeX folder already present. Suggesting to skip install."
+if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosole.exe" -ErrorAction SilentlyContinue)) {
+    Write-Warning "MiKTeX install seems already present. Suggesting to skip install."
     $do_miktex = $false
     $answer = Read-Host "Reinstall anyway? ( y / n )"
     switch($answer) {
@@ -65,7 +65,7 @@ if (Test-Path -Path $target_miktex_folder) {
         }
     }
 }
-if (Test-Path -Path $target_pandoc_folder) {
+if ((Test-Path -Path $target_pandoc_folder) -or (Get-Command -Name "pandoc.exe" -ErrorAction SilentlyContinue)) {
     Write-Warning "Pandoc folder already present. Suggesting to skip install."
     $do_pandoc = $false
     $answer = Read-Host "Reinstall anyway? ( y / n )"
@@ -91,7 +91,7 @@ if (-not ($pandoc_download_uri -eq $web_pandoc_download_uri)) {
 $web_miktex_dl_page = Invoke-WebRequest -Uri "https://miktex.org/download/" -UseBasicParsing
 # MiKTeX has the same download link twice on the page, hence the filter to unique.
 $web_miktex_dl_page_links = $web_miktex_dl_page.Links.href | Where-Object {$_ -match "basic.*64"} | Select-Object -Unique
-$web_miktex_download_uri = "https://miktex.org/" + $web_miktex_dl_page_links
+$web_miktex_download_uri = "https://miktex.org" + $web_miktex_dl_page_links
 if (-not ($miktex_download_uri -eq $web_miktex_download_uri)) {
     Write-Warning "MiKTeX: Never version avaiable online: $web_miktex_download_uri"
     Write-Host "MiKTeX: Will use that version for download."

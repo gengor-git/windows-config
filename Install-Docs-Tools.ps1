@@ -59,7 +59,7 @@ function Download-Installer {
     Write-Host "File saved to $DownloadTargetFile."
 }
 
-Get-Content -Path titleascii.txt | Write-Host
+Get-Content -Path "titleascii-install-docs-tools.txt" | Write-Host
 
 # Fail-Safe
 if ((Test-Path -Path $target_pandoc_folder) -or (Get-Command -Name "pandoc.exe" -ErrorAction SilentlyContinue)) {

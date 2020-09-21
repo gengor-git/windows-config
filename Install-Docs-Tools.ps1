@@ -127,7 +127,7 @@ if ($do_pandoc) {
     # Pandoc download page is at https://github.com/jgm/pandoc/releases/latest
     $web_pandoc_download_uri = Get-LatestDownload -BaseUri $pandoc_base_uri -SearchPattern $pandoc_installer_pattern
     if (-not ($pandoc_download_uri -eq $web_pandoc_download_uri)) {
-        Write-Warning "Pandoc: Never version avaiable online: $web_pandoc_download_uri"
+        Write-Warning "Pandoc: Newer version avaiable online: $web_pandoc_download_uri"
         Write-Host "Pandoc: Script will use that version for download."
         $pandoc_download_uri = $web_pandoc_download_uri
     }
@@ -174,7 +174,7 @@ if ($do_miktex) {
     Write-Host "Checking available versions online."
     $web_miktex_download_uri = Get-LatestDownload -BaseUri $miktex_base_uri -SearchPattern $miktex_installer_pattern
     if (-not ($miktex_download_uri -eq $web_miktex_download_uri)) {
-        Write-Warning "MiKTeX: Never version avaiable online: $web_miktex_download_uri"
+        Write-Warning "MiKTeX: Newer version avaiable online: $web_miktex_download_uri"
         Write-Host "MiKTeX: Script will use that version for download."
         $miktex_download_uri = $web_miktex_download_uri
     }
@@ -183,7 +183,7 @@ if ($do_miktex) {
         Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
     }
     else {
-        $answer = Read-Host "Download and overwrite? ( y / n )"
+        $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
                 Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
@@ -221,7 +221,7 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
             $web_python_dl_page_links = $web_python_dl_page.Links.href | Where-Object {$_ -match $python_installer_pattern} | Select-Object -Unique
             $web_python_download_uri = $web_python_dl_page_links
             if (-not ($python_download_uri -eq $web_python_download_uri)) {
-                Write-Warning "Python: Never version avaiable online: $web_python_download_uri"
+                Write-Warning "Python: Newer version avaiable online: $web_python_download_uri"
                 Write-Host "Python: Script will use that version for download."
                 $python_download_uri = $web_python_download_uri
             }

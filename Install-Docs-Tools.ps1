@@ -41,7 +41,7 @@ $python_install_params = "/passive /InstallAllUsers=0"
 $user_path = [System.Environment]::GetEnvironmentVariable("Path", "User")
 $path_changed = $false
 
-function Download-Installer {
+function Get-Installer {
     Param (
         [Parameter(Mandatory=$true)]
         [String]

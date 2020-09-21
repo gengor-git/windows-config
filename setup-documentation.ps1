@@ -19,7 +19,8 @@ $target_miktex_path = "$target_miktex_folder\texmfs\install\miktex\bin\x64"
 $target_pandoc_path = ""
 
 $pandoc_installer = "$download_folder\pandoc-2.10.1-windows-x86_64.zip"
-$pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
+$pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10/pandoc-2.10-windows-x86_64.zip"
+#https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
 
 $user_path = [System.Environment]::GetEnvironmentVariable("Path", "User")
 $path_changed = $false
@@ -74,6 +75,28 @@ if (Test-Path -Path $target_pandoc_folder) {
         }
     }
 }
+
+# Check if we have the latest download version in our links above
+# MiKTeX download page is at https://miktex.org/download/
+$mkd = Invoke-WebRequest -Uri "https://miktex.org/download/" -UseBasicParsing
+$mkdl = $mkd.Links.href | ? {$_ -match "basic.*64"}
+$mkdl = "https://miktex.org/" + $mkdl[0]
+if (-not ($miktex_download_uri -eq $mkdl)) {
+    Write-Warning "Never version avaiable online: $mkdl"
+    Write-Host "Will use that version for download."
+    $miktex_download_uri = $mkdl
+}
+# Pandoc download page is at https://github.com/jgm/pandoc/releases/latest
+$pdd = Invoke-WebRequest -Uri "https://github.com/jgm/pandoc/releases/latest" -UseBasicParsing
+$pddl = $pdd.Links.href | ? {$_ -match "64\.zip"}
+Write-Host $pddl
+$pddl = "https://github.com" + $pddl
+if (-not ($pandoc_download_uri -eq $pddl)) {
+    Write-Warning "Never version avaiable online: $pddl"
+    Write-Host "Will use that version for download."
+    $pandoc_download_uri = $pddl
+}
+
 
 # Download directory needs to be present to store the installers.
 if (Test-Path -Path $download_folder) {

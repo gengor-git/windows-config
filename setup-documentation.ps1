@@ -7,7 +7,7 @@ Currently Work-in-Progress.
 $do_pandoc = $true
 $do_miktex = $true
 # python is not really needed, so it defaults to "NO"
-$do_python = $false
+$do_python = $false # As is, there's a separate question prior to installing python. This value is not used, yet!
 
 $download_folder = "$env:USERPROFILE\Downloads\documentation-downloads"
 
@@ -103,7 +103,7 @@ if ($do_pandoc) {
     $web_pandoc_download_uri = "https://github.com" + $web_pandoc_dl_page_links
     if (-not ($pandoc_download_uri -eq $web_pandoc_download_uri)) {
         Write-Warning "Pandoc: Never version avaiable online: $web_pandoc_download_uri"
-        Write-Host "Pandoc: Will use that version for download."
+        Write-Host "Pandoc: Script will use that version for download."
         $pandoc_download_uri = $web_pandoc_download_uri
     }
     if (-not (Test-Path -Path $pandoc_installer)) {
@@ -153,7 +153,7 @@ if ($do_miktex) {
     $web_miktex_download_uri = "https://miktex.org" + $web_miktex_dl_page_links
     if (-not ($miktex_download_uri -eq $web_miktex_download_uri)) {
         Write-Warning "MiKTeX: Never version avaiable online: $web_miktex_download_uri"
-        Write-Host "MiKTeX: Will use that version for download."
+        Write-Host "MiKTeX: Script will use that version for download."
         $miktex_download_uri = $web_miktex_download_uri
     }
 
@@ -202,7 +202,7 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
             $web_python_download_uri = $web_python_dl_page_links
             if (-not ($python_download_uri -eq $web_python_download_uri)) {
                 Write-Warning "Python: Never version avaiable online: $web_python_download_uri"
-                Write-Host "Python: Will use that version for download."
+                Write-Host "Python: Script will use that version for download."
                 $python_download_uri = $web_python_download_uri
             }
             Download-Installer -DownloadSource $python_download_uri -DownloadTargetFile $python_installer -DownloadName "Python"
@@ -211,6 +211,7 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
     }
 }
 
+
 # Save all the changes to the path environment for the user.
 if ($path_changed) {
     Write-Host "Save path environment ... " -NoNewline
@@ -218,7 +219,9 @@ if ($path_changed) {
     Write-Host "done."
 }
 
-
-Write-Host "+==================+"
-Write-Host "| Script finished. |"
-Write-Host "+==================+"
+Write-Host "                   _         _        __  _         _       _                _"
+Write-Host "  ___   ___  _ __ (_) _ __  | |_     / _|(_) _ __  (_) ___ | |__    ___   __| |"
+Write-Host " / __| / __|| '__|| || '_ \ | __|   | |_ | || '_ \ | |/ __|| '_ \  / _ \ / _`` |"
+Write-Host " \__ \| (__ | |   | || |_) || |_    |  _|| || | | || |\__ \| | | ||  __/| (_| |"
+Write-Host " |___/ \___||_|   |_|| .__/  \__|   |_|  |_||_| |_||_||___/|_| |_| \___| \__,_|"
+Write-Host "                     |_|"

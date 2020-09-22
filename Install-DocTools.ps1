@@ -220,10 +220,7 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
     $answer = Read-Host "Do you want to install Python now? ( y / n )"
     switch ($answer) {
         Y {
-            $web_python_dl_page = Invoke-WebRequest -Uri $python_base_uri -UseBasicParsing
-            # python has the same download link twice on the page, hence the filter to unique.
-            $web_python_dl_page_links = $web_python_dl_page.Links.href | Where-Object {$_ -match $python_installer_pattern} | Select-Object -Unique
-            $web_python_download_uri = $web_python_dl_page_links
+            $web_python_download_uri = Get-LatestDownload -BaseUri $python_base_uri -SearchPattern $python_installer_pattern
             if (-not ($python_download_uri -eq $web_python_download_uri)) {
                 Write-Warning "Python: Newer version avaiable online: $web_python_download_uri"
                 Write-Host "Python: Script will use that version for download."

@@ -10,11 +10,12 @@ settings.
 ### Features
 
 - Create Download directory (if not present)
-- Basic pre-checks to see tools are already installed
-- Download Pandoc & install as portable
-- Download MiKTeX (installer) and silent install as portable
-- Set path variable (w/ some error checking before)
-- Optionally install Python silent for single user
+- Basic pre-checks to see if tools are already installed
+- Download **Pandoc** (zip) and _install as portable_
+- Download **MiKTeX** (installer) and _silent install as portable_
+- _Set path variable_ (w/ some error checking before)
+- Optionally (user confirmation required)
+  - Install Python silently for single user (if it does not find it in path)
 
 ### How to use
 

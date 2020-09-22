@@ -23,6 +23,18 @@ settings.
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/gengor-git/windows-config/master/Install-DocTools.ps1'))
 ```
 
-### Backlog
+## Install-DocConfiguration.ps1
+
+Installs the configurations and templates needed to run pandoc with nicer outputs.
+
+Requires a local directory `C:\temp\`, network-share or WebDAV-Source (`\\server\folder`) which contains the snapshot zip of the toolkit!!
+
+### How to use
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/gengor-git/windows-config/master/Install-DocConfiguration.ps1'))
+```
+
+## Backlog
 
 - [ ] Possibly switch to [DSC](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_desiredstateconfiguration?view=powershell-5.1) for environment variables

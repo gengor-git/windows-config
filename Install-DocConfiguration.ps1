@@ -2,7 +2,6 @@
 Get configurations for the doc tools and install them for the local user.
 #>
 
-[CmdletBinding()]
 param (
     [Parameter(Mandatory=$true)]
     [String]

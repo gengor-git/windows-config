@@ -136,13 +136,13 @@ if ($do_pandoc) {
         $pandoc_download_uri = $web_pandoc_download_uri
     }
     if (-not (Test-Path -Path $pandoc_installer)) {
-        Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
+        Get-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
     }
     else {
         $answer = Read-Host "Download exists. Re-download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
-                Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
+                Get-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
             }
         }
     }
@@ -184,13 +184,13 @@ if ($do_miktex) {
     }
 
     if (-not (Test-Path -Path $miktex_installer)) {
-        Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
+        Get-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
     }
     else {
         $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
-                Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
+                Get-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
             }
         }
     }
@@ -226,7 +226,7 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
                 Write-Host "Python: Script will use that version for download."
                 $python_download_uri = $web_python_download_uri
             }
-            Download-Installer -DownloadSource $python_download_uri -DownloadTargetFile $python_installer -DownloadName "Python"
+            Get-Installer -DownloadSource $python_download_uri -DownloadTargetFile $python_installer -DownloadName "Python"
             if (-not ($dryrun)) { Start-Process -FilePath $python_installer -ArgumentList $python_install_params -NoNewWindow -Wait }
         }
     }

@@ -10,7 +10,11 @@ param (
 
 # Install the pandoc templates from a WebDAV source, that is given as parameter.
 $documentation_toolkit_webdav = $SourceWebDavUri
-Write-Host $args[0]
+
+if (-not ($documentation_toolkit_webdav)) {
+  $documentation_toolkit_webdav = Read-Host "URI to load the toolkit from:"
+}
+
 $documentation_toolkit_local = "C:\Portable\documentation-toolkit"
 Get-ChildItem -Path $documentation_toolkit_webdav | ? {$_.Name -match "snapshot.*\.zip"} | Expand-Archive -DestinationPath $documentation_toolkit_local -Force
 [System.Environment]::SetEnvironmentVariable("Pandoc_Datadir", $documentation_toolkit_local, "User")

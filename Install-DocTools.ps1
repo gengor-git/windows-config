@@ -87,9 +87,13 @@ function Get-LatestDownload {
   return $dl_links
 }
 
-Get-Content -Path "titleascii-install-docs-tools.txt" | Write-Host
-
-# Fail-Safe
+Write-Host "   _____           _        _ _      ___          _____            _     "
+Write-Host "   \_   \_ __  ___| |_ __ _| | |    /   \___   __/__   \___   ___ | |___ "
+Write-Host "    / /\/ '_ \/ __| __/ _`` | | |   / /\ / _ \ / __|/ /\/ _ \ / _ \| / __|"
+Write-Host " /\/ /_ | | | \__ \ || (_| | | |  / /_// (_) | (__/ / | (_) | (_) | \__ \"
+Write-Host " \____/ |_| |_|___/\__\__,_|_|_| /___,' \___/ \___\/   \___/ \___/|_|___/"
+Write-Host ""
+                                                                        
 if ((Test-Path -Path $target_pandoc_folder) -or (Get-Command -Name "pandoc.exe" -ErrorAction SilentlyContinue)) {
     Write-Warning "Pandoc install seems already present. Suggesting to skip install."
     $do_pandoc = $false
@@ -239,9 +243,12 @@ if ($path_changed) {
     Write-Host "done."
 }
 
-Write-Host "                   _         _        __  _         _       _                _"
-Write-Host "  ___   ___  _ __ (_) _ __  | |_     / _|(_) _ __  (_) ___ | |__    ___   __| |"
-Write-Host " / __| / __|| '__|| || '_ \ | __|   | |_ | || '_ \ | |/ __|| '_ \  / _ \ / _`` |"
-Write-Host " \__ \| (__ | |   | || |_) || |_    |  _|| || | | || |\__ \| | | ||  __/| (_| |"
-Write-Host " |___/ \___||_|   |_|| .__/  \__|   |_|  |_||_| |_||_||___/|_| |_| \___| \__,_|"
-Write-Host "                     |_|"
+Write-Host ""
+Write-Host "     ___                   "
+Write-Host "    /   \___  _ __   ___   "
+Write-Host "   / /\ / _ \| '_ \ / _ \  "
+Write-Host "  / /_// (_) | | | |  __/_ "
+Write-Host " /___,' \___/|_| |_|\___(_)"
+Write-Host ""
+                       
+

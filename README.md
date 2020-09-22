@@ -2,7 +2,7 @@
 
 Scripts and configs for my Windows environment
 
-## Install-Docs-Tools.ps1
+## Install-DocTools.ps1
 
 Script to install my documentation tools and make some relevant config
 settings.
@@ -15,6 +15,12 @@ settings.
 - Download MiKTeX (installer) and silent install as portable
 - Set path variable (w/ some error checking before)
 - Optionally install Python silent for single user
+
+### How to use
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/gengor-git/windows-config/master/Install-DocTools.ps1'))
+```
 
 ### Backlog
 

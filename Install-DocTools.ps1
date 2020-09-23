@@ -37,13 +37,15 @@ $target_miktex_path = "$target_miktex_folder\texmfs\install\miktex\bin\x64"
 
 $git_installer = "$download_folder\Git-64-bit.exe"
 $git_base_uri = "https://git-scm.com/download/win"
-$git_installer_pattern ="Git.*-64-bit\.exe"
+$git_installer_pattern ="PortableGit.*-64-bit\.7z\.exe"
 $git_download_uri = "https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe"
-$git_install_params = "/silent"
+$target_git_folder = "$target_root_folder\git"
+$target_git_path = "$target_git_folder\bin"
+$git_install_params = "-o `"$target_git_folder`" -y"
 
 $vscode_installer = "$download_folder\VSCodeUserSetup-x64.exe"
 $vscode_download_uri = "https://aka.ms/win32-x64-user-stable"
-$vscode_install_params = "/silent"
+$vscode_install_params = "/verysilent"
 
 $python_installer = "$download_folder\python-setup.exe"
 $python_base_uri = "https://www.python.org/downloads/"
@@ -261,7 +263,7 @@ if ($do_git) {
         $git_download_uri = $web_git_download_uri
     }
     if (-not (Test-Path -Path $git_installer)) {
-        Get-Installer -DownloadSource $git_download_uri -DownloadTargetFile $git_installer -DownloadName "Visual Studio Code"
+        Get-Installer -DownloadSource $git_download_uri -DownloadTargetFile $git_installer -DownloadName "Git portable"
     }
     else {
         $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
@@ -271,8 +273,22 @@ if ($do_git) {
             }
         }
     }
-    Write-Host "Running git install for single user."
+    Write-Host "Installing git as portable version."
     if (-not ($dryrun)) { Start-Process -FilePath $git_installer -ArgumentList $git_install_params -NoNewWindow -Wait }
+
+    if ($user_path.Contains($target_git_path)) {
+        Write-Warning "Git already in PATH."
+    }
+    else {
+        Write-Host "Will add Git bin to PATH variable and save later."
+        $user_path += ";" + $target_git_path
+        $path_changed = $true
+    }
+    $count_git_in_path = ($user_path.Split(";") | Where-Object {$_ -match "git"}).Count
+    if ($count_git_in_path -gt 1) {
+        Write-Warning "You have Git in your path more than once! Please fix this manually to avoid errors."
+        $user_path.Split(";") | Where-Object {$_ -match "git"} | Write-Warning
+    }    
 }
 
 if ($do_vscode) {

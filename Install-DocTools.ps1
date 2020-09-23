@@ -6,6 +6,9 @@ Currently Work-in-Progress.
 # Reasonable defauls what to install and what not.
 $do_pandoc = $true
 $do_miktex = $true
+$do_git = $true
+$do_vscode = $true
+
 # python is not really needed, so it defaults to "NO"
 $do_python = $false # As is, there's a separate question prior to installing python. This value is not used, yet!
 # Don't actually unszip or install anything. Downloads will still be done.
@@ -31,6 +34,16 @@ $miktex_installer_pattern = "basic.*64"
 $miktex_download_uri = "https://miktex.org/download/ctan/systems/win32/miktex/setup/windows-x64/basic-miktex-20.6.29-x64.exe"
 $miktex_install_params = "--portable=`"$target_miktex_folder`" --auto-install=yes --unattended"
 $target_miktex_path = "$target_miktex_folder\texmfs\install\miktex\bin\x64"
+
+$git_installer = "$download_folder\Git-64-bit.exe"
+$git_base_uri = "https://git-scm.com/download/win"
+$git_installer_pattern ="Git.*-64-bit\.exe"
+$git_download_uri = "https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe"
+$git_install_params = "/silent"
+
+$vscode_installer = "$download_folder\VSCodeUserSetup-x64.exe"
+$vscode_download_uri = "https://aka.ms/win32-x64-user-stable"
+$vscode_install_params = "/silent"
 
 $python_installer = "$download_folder\python-setup.exe"
 $python_base_uri = "https://www.python.org/downloads/"
@@ -80,7 +93,7 @@ function Get-LatestDownload {
   )
   $site = Invoke-WebRequest -Uri $BaseUri -UseBasicParsing
   $dl_links = $site.Links.href | Where-Object {$_ -match $SearchPattern} | Select-Object -Unique
-  if (-not ($dl_links -match "$\/")) {
+  if (-not ($dl_links -match "https.*")) {
     $domain = $BaseUri.Split("/")[2]
     $dl_links = "https://$domain$dl_links"
   }
@@ -114,6 +127,27 @@ if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosol
         }
     }
 }
+if (Get-Command -Name "code" -ErrorAction SilentlyContinue) {
+    Write-Warning "VS Code install seems already present. Suggesting to skip install."
+    $do_miktex = $false
+    $answer = Read-Host "Reinstall anyway? ( y / n )"
+    switch($answer) {
+        Y {
+            $do_vscode = $true
+        }
+    }
+}
+if (Get-Command -Name "git.exe" -ErrorAction SilentlyContinue) {
+    Write-Warning "Git install seems already present. Suggesting to skip install."
+    $do_miktex = $false
+    $answer = Read-Host "Reinstall anyway? ( y / n )"
+    switch($answer) {
+        Y {
+            $do_git = $true
+        }
+    }
+}
+
 
 # Download directory needs to be present to store the installers.
 if (Test-Path -Path $download_folder) {
@@ -213,6 +247,51 @@ if ($do_miktex) {
     }    
 }
 
+# TODO: Git client
+# https://git-scm.com/download/win
+# /silent
+
+if ($do_git) {
+    Write-Host "=====GIT======"
+
+    $web_git_download_uri = Get-LatestDownload -BaseUri $git_base_uri -SearchPattern $git_installer_pattern
+    if (-not ($git_download_uri -eq $web_git_download_uri)) {
+        Write-Warning "Git: Newer version avaiable online: $web_git_download_uri"
+        Write-Host "Git: Script will use that version for download."
+        $git_download_uri = $web_git_download_uri
+    }
+    if (-not (Test-Path -Path $git_installer)) {
+        Get-Installer -DownloadSource $git_download_uri -DownloadTargetFile $git_installer -DownloadName "Visual Studio Code"
+    }
+    else {
+        $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
+        switch ($answer) {
+            Y {
+                Get-Installer -DownloadSource $git_download_uri -DownloadTargetFile $git_installer -DownloadName "Visual Studio Code"
+            }
+        }
+    }
+    Write-Host "Running git install for single user."
+    if (-not ($dryrun)) { Start-Process -FilePath $git_installer -ArgumentList $git_install_params -NoNewWindow -Wait }
+}
+
+if ($do_vscode) {
+    Write-Host "====VSCODE===="
+
+    if (-not (Test-Path -Path $vscode_installer)) {
+        Get-Installer -DownloadSource $vscode_download_uri -DownloadTargetFile $vscode_installer -DownloadName "Visual Studio Code"
+    }
+    else {
+        $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
+        switch ($answer) {
+            Y {
+                Get-Installer -DownloadSource $vscode_download_uri -DownloadTargetFile $vscode_installer -DownloadName "Visual Studio Code"
+            }
+        }
+    }
+    Write-Host "Running VS Code install for single user."
+    if (-not ($dryrun)) { Start-Process -FilePath $vscode_installer -ArgumentList $vscode_install_params -NoNewWindow -Wait }
+}
 
 # Optional stuff: Python
 if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {

@@ -140,7 +140,7 @@ if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosol
 }
 if (Get-Command -Name "code" -ErrorAction SilentlyContinue) {
     Write-Warning "VS Code install seems already present. Suggesting to skip install."
-    $do_miktex = $false
+    $do_vscode = $false
     $answer = Read-Host "Reinstall anyway? ( y / n )"
     switch($answer) {
         Y {
@@ -150,7 +150,7 @@ if (Get-Command -Name "code" -ErrorAction SilentlyContinue) {
 }
 if (Get-Command -Name "git.exe" -ErrorAction SilentlyContinue) {
     Write-Warning "Git install seems already present. Suggesting to skip install."
-    $do_miktex = $false
+    $do_git = $false
     $answer = Read-Host "Reinstall anyway? ( y / n )"
     switch($answer) {
         Y {

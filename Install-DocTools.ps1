@@ -191,7 +191,7 @@ if ($do_pandoc) {
             }
         }
     }
-    Write-Host "Unzipping Pandoc ..." -NoNewline
+    Write-Host "Unzipping Pandoc ... " -NoNewline
     if (-not ($dryrun)) { Expand-Archive -Path $pandoc_installer -DestinationPath $target_pandoc_folder -Force }
     Write-Host "done."
     # Pandoc unzips with a separate folder and that folder must be added
@@ -338,7 +338,7 @@ if ($do_xmind) {
             }
         }
     }
-    Write-Host "Unzipping XMind 8 ..." -NoNewline
+    Write-Host "Unzipping XMind 8 ... " -NoNewline
     if (-not ($dryrun)) { Expand-Archive -Path $xmind_installer -DestinationPath $target_xmind_folder -Force }
     Write-Host "done."
 

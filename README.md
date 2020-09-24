@@ -10,7 +10,7 @@ settings.
 ### Features
 
 - Create Download directory (if not present)
-- Basic pre-checks to see if tools are already installed (confirm, to re-install)
+- Basic pre-checks to see if tools are already installed (confirm, to reinstall)
 - Download **[Pandoc](https://pandoc.org/)** (zip) and _install as portable_
 - Download **[MiKTeX](https://miktex.org/)** (installer) and _silent install as portable_
 - Download **[Git](https://git-scm.com/)** (zip) and _install as portable_

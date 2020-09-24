@@ -26,12 +26,12 @@ if (Get-Command "code" -ErrorAction SilentlyContinue) {
   Write-Host "VS Code is present."
 
   # Install Extensions like Pandoc, Markdown and German language
-  Start-Process -FilePath "code" -ArgumentList "--install-extension chrischinchilla.vscode-pandoc" -NoNewWindow
-  Start-Process -FilePath "code" -ArgumentList "--install-extension ms-ceintl.vscode-language-pack-de" -NoNewWindow
-  Start-Process -FilePath "code" -ArgumentList "--install-extension eamodio.gitlens" -NoNewWindow
-  Start-Process -FilePath "code" -ArgumentList "--install-extension yzhang.markdown-all-in-one" -NoNewWindow
-  Start-Process -FilePath "code" -ArgumentList "--install-extension darkriszty.markdown-table-prettify" -NoNewWindow
-  Start-Process -FilePath "code" -ArgumentList "--install-extension mechatroner.rainbow-csv" -NoNewWindow
+  Start-Process -FilePath "code" -ArgumentList "--install-extension chrischinchilla.vscode-pandoc" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension ms-ceintl.vscode-language-pack-de" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension eamodio.gitlens" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension yzhang.markdown-all-in-one" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension darkriszty.markdown-table-prettify" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension mechatroner.rainbow-csv" -NoNewWindow -Wait
 
   $pandoc_opt_pdf = "--number-sections --data-dir $documentation_toolkit_local --template eisvogel --pdf-engine=xelatex -V colorlinks --listings"
   $pandoc_opt_html = "-t html5 -s --self-contained --data-dir $documentation_toolkit_local --template=GitHub --toc"
@@ -60,7 +60,7 @@ if (Get-Command "pip" -ErrorAction SilentlyContinue) {
       Write-Host "Package $package already installed."
     } else {
       Write-Host "Installing package $package to user space."
-      Start-Process -FilePath "pip" -ArgumentList "install $package --user" -NoNewWindow
+      Start-Process -FilePath "pip" -ArgumentList "install $package --user" -NoNewWindow -Wait
     }
   }
 }

@@ -23,12 +23,12 @@ if (Get-Command "code" -ErrorAction SilentlyContinue) {
   Write-Host "VS Code is present."
 
   # Install Extensions like Pandoc, Markdown and German language
-  Start-Process -FilePath "code" -ArgumentList "--install-extension chrischinchilla.vscode-pandoc"
-  Start-Process -FilePath "code" -ArgumentList "--install-extension ms-ceintl.vscode-language-pack-de"
-  Start-Process -FilePath "code" -ArgumentList "--install-extension eamodio.gitlens"
-  Start-Process -FilePath "code" -ArgumentList "--install-extension yzhang.markdown-all-in-one"
-  Start-Process -FilePath "code" -ArgumentList "--install-extension darkriszty.markdown-table-prettify"
-  Start-Process -FilePath "code" -ArgumentList "--install-extension mechatroner.rainbow-csv"
+  Start-Process -FilePath "code" -ArgumentList "--install-extension chrischinchilla.vscode-pandoc" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension ms-ceintl.vscode-language-pack-de" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension eamodio.gitlens" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension yzhang.markdown-all-in-one" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension darkriszty.markdown-table-prettify" -NoNewWindow -Wait
+  Start-Process -FilePath "code" -ArgumentList "--install-extension mechatroner.rainbow-csv" -NoNewWindow -Wait
 
   $pandoc_opt_pdf = "--number-sections --data-dir $LocalDocumentationToolkitDirectory --template eisvogel --pdf-engine=xelatex -V colorlinks --listings"
   $pandoc_opt_html = "-t html5 -s --self-contained --data-dir $LocalDocumentationToolkitDirectory --template=GitHub --toc"
@@ -38,5 +38,26 @@ if (Get-Command "code" -ErrorAction SilentlyContinue) {
 
   Write-Warning "Please add the following lines to your VS Code Settings `"pandoc.htmlOptString:`""
   Write-Host $pandoc_opt_html
-  #Get-Content -Path "$env:USERPROFILE\AppData\Roaming\code\user\settings.json"
+
+  # TODO: Change these settings automatically in "$env:USERPROFILE\AppData\Roaming\code\user\settings.json"
+}
+
+if (Get-Command "pip" -ErrorAction SilentlyContinue) {
+  Write-Host "Python is present."
+  $pip_local = pip list -l
+
+  $packages = @(
+    "pandocfilters",
+    "pandoc-latex-environment"
+  )
+
+  Write-Host "Checking for installed pip packages."
+  foreach ($package in $packages) {
+    if ($pip_local | % {$_ -like $package+"*"} | ? {$_ -eq $true}) {
+      Write-Host "Package $package already installed."
+    } else {
+      Write-Host "Installing package $package to user space."
+      Start-Process -FilePath "pip" -ArgumentList "install $package --user" -NoNewWindow -Wait
+    }
+  }
 }

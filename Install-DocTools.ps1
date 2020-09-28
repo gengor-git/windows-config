@@ -140,7 +140,7 @@ if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosol
 }
 if (Get-Command -Name "code" -ErrorAction SilentlyContinue) {
     Write-Warning "VS Code install seems already present. Suggesting to skip install."
-    $do_miktex = $false
+    $do_vscode = $false
     $answer = Read-Host "Reinstall anyway? ( y / n )"
     switch($answer) {
         Y {
@@ -150,7 +150,7 @@ if (Get-Command -Name "code" -ErrorAction SilentlyContinue) {
 }
 if (Get-Command -Name "git.exe" -ErrorAction SilentlyContinue) {
     Write-Warning "Git install seems already present. Suggesting to skip install."
-    $do_miktex = $false
+    $do_git = $false
     $answer = Read-Host "Reinstall anyway? ( y / n )"
     switch($answer) {
         Y {
@@ -191,7 +191,7 @@ if ($do_pandoc) {
             }
         }
     }
-    Write-Host "Unzipping Pandoc ..." -NoNewline
+    Write-Host "Unzipping Pandoc ... " -NoNewline
     if (-not ($dryrun)) { Expand-Archive -Path $pandoc_installer -DestinationPath $target_pandoc_folder -Force }
     Write-Host "done."
     # Pandoc unzips with a separate folder and that folder must be added
@@ -338,7 +338,7 @@ if ($do_xmind) {
             }
         }
     }
-    Write-Host "Unzipping XMind 8 ..." -NoNewline
+    Write-Host "Unzipping XMind 8 ... " -NoNewline
     if (-not ($dryrun)) { Expand-Archive -Path $xmind_installer -DestinationPath $target_xmind_folder -Force }
     Write-Host "done."
 

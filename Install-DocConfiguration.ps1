@@ -44,20 +44,20 @@ if (Get-Command "code" -ErrorAction SilentlyContinue) {
 
 if (Get-Command "pip" -ErrorAction SilentlyContinue) {
   Write-Host "Python is present."
-  $pip_local = pip list -l
+  $LocalPipPackagesInstalled = pip list -l
 
-  $packages = @(
+  $WantedPipPackages = @(
     "pandocfilters",
     "pandoc-latex-environment"
   )
 
   Write-Host "Checking for installed pip packages."
-  foreach ($package in $packages) {
-    if ($pip_local | % {$_ -like $package+"*"} | ? {$_ -eq $true}) {
-      Write-Host "Package $package already installed."
+  foreach ($Package in $WantedPipPackages) {
+    if ($LocalPipPackagesInstalled | ForEach-Object {$_ -like $Package+"*"} | Where-Object {$_ -eq $true}) {
+      Write-Host "Package $Package already installed."
     } else {
-      Write-Host "Installing package $package to user space."
-      Start-Process -FilePath "pip" -ArgumentList "install $package --user" -NoNewWindow -Wait
+      Write-Host "Installing package $Package to user space."
+      Start-Process -FilePath "pip" -ArgumentList "install $Package --user" -NoNewWindow -Wait
     }
   }
 }

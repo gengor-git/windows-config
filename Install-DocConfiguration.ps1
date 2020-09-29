@@ -7,7 +7,7 @@ param (
     [Parameter(Mandatory)]
     [String]
     [ValidateNotNullOrEmpty()]
-    $SourceToolkitDirectory,
+    $SourceToolkitDirectory = "$env:USERPROFILE\Desktop",
     [String]
     $ToolkitZipFilePattern = "snapshot.*\.zip"
 )

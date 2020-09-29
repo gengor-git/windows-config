@@ -30,7 +30,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 
 Installs the configurations and templates needed to run pandoc with nicer outputs. Also installs certain VS Code extensions if VS Code is deteced. In case Python is present, it checks for installed pandoc-filters and if needed installs them into user space.
 
-Requires a local directory (`C:\temp\`), network-share or WebDAV-Source (`\\server\folder`) which contains the snapshot zip of the toolkit!!
+Requires a local directory (`C:\temp\`), network-share or WebDAV/SMB-Source (`\\server\folder`) which contains the snapshot zip of the toolkit!!
 
 ### How to use
 

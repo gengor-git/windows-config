@@ -5,7 +5,7 @@ Scripts and configs for my Windows environment
 ## Install-DocTools.ps1
 
 Script to install my documentation tools and make some relevant config
-settings.
+settings like placing installed tools in the path _without_ the need for administrative rights. It does so by installing tools as portable version or installing it into the user space (`~/AppData/Local/Programs`). Latest versions of the tools are dynamically downloaded of the internet.
 
 ### Features
 
@@ -28,7 +28,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 
 ## Install-DocConfiguration.ps1
 
-Installs the configurations and templates needed to run pandoc with nicer outputs.
+Installs the configurations and templates needed to run pandoc with nicer outputs. Also installs certain VS Code extensions if VS Code is deteced. In case Python is present, it checks for installed pandoc-filters and if needed installs them into user space.
 
 Requires a local directory (`C:\temp\`), network-share or WebDAV-Source (`\\server\folder`) which contains the snapshot zip of the toolkit!!
 

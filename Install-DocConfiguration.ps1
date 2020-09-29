@@ -4,9 +4,9 @@ Get configurations for the doc tools and install them for the local user.
 
 [CmdletBinding()]
 param (
+    [Parameter(Mandatory)]
     [String]
-    [ValidateNotNullOrEmpty()]
-    $SourceToolkitDirectory = "$env:USERPROFILE\Desktop",
+    $SourceToolkitDirectory,
     [String]
     $ToolkitZipFilePattern = "snapshot.*\.zip"
 )

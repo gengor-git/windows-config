@@ -6,13 +6,18 @@ Get configurations for the doc tools and install them for the local user.
 param (
     [Parameter(Mandatory)]
     [String]
+    [ValidateNotNullOrEmpty()]
     $SourceToolkitDirectory,
     [String]
-    $TookitFilePattern = "snapshot.*\.zip"
+    $ToolkitZipFilePattern = "snapshot.*\.zip"
 )
 
-if (-not ($SourceToolkitDirectory)) {
-  $SourceToolkitDirectory = Read-Host "Please enter a valid directory to look for the tookit zip file of pattern `"$TookitFilePattern`"."
+if (-not (Test-Path -Path $SourceToolkitDirectory)) {
+  $SourceToolkitDirectory = Read-Host "Please enter a valid directory to look for the tookit zip file of pattern `"$ToolkitZipFilePattern`""
+}
+
+if (-not (Test-Path -Path $SourceToolkitDirectory)) {
+  throw "Directory does not exist."
 }
 
 $LocalDocumentationToolkitDirectory = "C:\Portable\documentation-toolkit"

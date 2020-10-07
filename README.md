@@ -2,20 +2,42 @@
 
 Scripts and configs for my Windows environment
 
-## Install-Docs-Tools.ps1
+## Install-DocTools.ps1
 
 Script to install my documentation tools and make some relevant config
-settings.
+settings like placing installed tools in the path _without_ the need for administrative rights. It does so by installing tools as portable version or installing it into the user space (`~/AppData/Local/Programs`). Latest versions of the tools are dynamically downloaded of the internet.
 
 ### Features
 
 - Create Download directory (if not present)
-- Basic pre-checks to see tools are already installed
-- Download Pandoc & install as portable
-- Download MiKTeX (installer) and silent install as portable
-- Set path variable (w/ some error checking before)
-- Optionally install Python silent for single user
+- Basic pre-checks to see if tools are already installed (confirm, to reinstall)
+- Download **[Pandoc](https://pandoc.org/)** (zip) and _install as portable_
+- Download **[MiKTeX](https://miktex.org/)** (installer) and _silent install as portable_
+- Download **[Git](https://git-scm.com/)** (zip) and _install as portable_
+- Download **[Visual Studio Code](https://code.visualstudio.com/)** (user installer) and _install as single user_
+- Download **[XMind 8](https://www.xmind.net/xmind8-pro/)** (zip) and _install as portable_
+- _Set path variable_ (w/ some error checking before)
+- Optionally (user confirmation required)
+  - Install **Python** silently for single user (if it doesn't find it in path)
 
-### Backlog
+### How to use
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/gengor-git/windows-config/master/Install-DocTools.ps1'))
+```
+
+## Install-DocConfiguration.ps1
+
+Installs the configurations and templates needed to run pandoc with nicer outputs. Also installs certain VS Code extensions if VS Code is deteced. In case Python is present, it checks for installed pandoc-filters and if needed installs them into user space.
+
+Requires a local directory (`C:\temp\`), network-share or WebDAV/SMB-Source (`\\server\folder`) which contains the snapshot zip of the toolkit!!
+
+### How to use
+
+```PowerShell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/gengor-git/windows-config/master/Install-DocConfiguration.ps1'))
+```
+
+## Backlog
 
 - [ ] Possibly switch to [DSC](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_desiredstateconfiguration?view=powershell-5.1) for environment variables

@@ -6,6 +6,9 @@ Currently Work-in-Progress.
 # Reasonable defauls what to install and what not.
 $do_pandoc = $true
 $do_miktex = $true
+$do_git = $true
+$do_vscode = $true
+$do_xmind = $true
 # python is not really needed, so it defaults to "NO"
 $do_python = $false # As is, there's a separate question prior to installing python. This value is not used, yet!
 # Don't actually unzip or install anything. Downloads will still be done.
@@ -17,12 +20,12 @@ $download_folder = "$env:USERPROFILE\Downloads\documentation-downloads"
 $target_root_folder = "C:\Portable"
 $target_miktex_folder = "$target_root_folder\miktex"
 $target_pandoc_folder = "$target_root_folder\pandoc"
+$target_xmind_folder = "$target_root_folder\xmind8"
 
 $pandoc_installer = "$download_folder\pandoc.zip"
 $pandoc_base_uri = "https://github.com/jgm/pandoc/releases/latest"
 $pandoc_installer_pattern = "64\.zip"
 $pandoc_download_uri = "https://github.com/jgm/pandoc/releases/download/2.10/pandoc-2.10-windows-x86_64.zip"
-#https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-windows-x86_64.zip"
 $target_pandoc_path = ""
 
 $miktex_installer = "$download_folder\miktex-portable.exe"
@@ -31,6 +34,23 @@ $miktex_installer_pattern = "basic.*64"
 $miktex_download_uri = "https://miktex.org/download/ctan/systems/win32/miktex/setup/windows-x64/basic-miktex-20.6.29-x64.exe"
 $miktex_install_params = "--portable=`"$target_miktex_folder`" --auto-install=yes --unattended"
 $target_miktex_path = "$target_miktex_folder\texmfs\install\miktex\bin\x64"
+
+$git_installer = "$download_folder\Git-64-bit.exe"
+$git_base_uri = "https://git-scm.com/download/win"
+$git_installer_pattern ="PortableGit.*-64-bit\.7z\.exe"
+$git_download_uri = "https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/PortableGit-2.28.0-64-bit.7z.exe"
+$target_git_folder = "$target_root_folder\git"
+$target_git_path = "$target_git_folder\bin"
+$git_install_params = "-o `"$target_git_folder`" -y"
+
+$vscode_installer = "$download_folder\VSCodeUserSetup-x64.exe"
+$vscode_download_uri = "https://aka.ms/win32-x64-user-stable"
+$vscode_install_params = "/verysilent"
+
+$xmind_installer = "$download_folder\xmind-8-windows.zip"
+$xmind_base_uri = "https://www.xmind.net/download/xmind8"
+$xmind_installer_pattern = "xmind.*-windows\.zip"
+$xmind_download_uri = "https://www.xmind.net/xmind/downloads/xmind-8-update9-windows.zip" 
 
 $python_installer = "$download_folder\python-setup.exe"
 $python_base_uri = "https://www.python.org/downloads/"
@@ -41,7 +61,7 @@ $python_install_params = "/passive /InstallAllUsers=0"
 $user_path = [System.Environment]::GetEnvironmentVariable("Path", "User")
 $path_changed = $false
 
-function Download-Installer {
+function Get-Installer {
     Param (
         [Parameter(Mandatory=$true)]
         [String]
@@ -80,16 +100,24 @@ function Get-LatestDownload {
   )
   $site = Invoke-WebRequest -Uri $BaseUri -UseBasicParsing
   $dl_links = $site.Links.href | Where-Object {$_ -match $SearchPattern} | Select-Object -Unique
-  if (-not ($dl_links -match "$\/")) {
+  if ($dl_links -match "\/\/") {
+      # Special fix for XMind download links.
+      $dl_links = "https:$dl_links"
+  }
+  if (-not ($dl_links -match "^https.*")) {
     $domain = $BaseUri.Split("/")[2]
     $dl_links = "https://$domain$dl_links"
   }
   return $dl_links
 }
 
-Get-Content -Path "titleascii-install-docs-tools.txt" | Write-Host
-
-# Fail-Safe
+Write-Host "   _____           _        _ _      ___          _____            _     "
+Write-Host "   \_   \_ __  ___| |_ __ _| | |    /   \___   __/__   \___   ___ | |___ "
+Write-Host "    / /\/ '_ \/ __| __/ _`` | | |   / /\ / _ \ / __|/ /\/ _ \ / _ \| / __|"
+Write-Host " /\/ /_ | | | \__ \ || (_| | | |  / /_// (_) | (__/ / | (_) | (_) | \__ \"
+Write-Host " \____/ |_| |_|___/\__\__,_|_|_| /___,' \___/ \___\/   \___/ \___/|_|___/"
+Write-Host ""
+                                                                        
 if ((Test-Path -Path $target_pandoc_folder) -or (Get-Command -Name "pandoc.exe" -ErrorAction SilentlyContinue)) {
     Write-Warning "Pandoc install seems already present. Suggesting to skip install."
     $do_pandoc = $false
@@ -110,6 +138,27 @@ if ((Test-Path -Path $target_miktex_folder) -or (Get-Command -Name "miktex-cosol
         }
     }
 }
+if (Get-Command -Name "code" -ErrorAction SilentlyContinue) {
+    Write-Warning "VS Code install seems already present. Suggesting to skip install."
+    $do_vscode = $false
+    $answer = Read-Host "Reinstall anyway? ( y / n )"
+    switch($answer) {
+        Y {
+            $do_vscode = $true
+        }
+    }
+}
+if (Get-Command -Name "git.exe" -ErrorAction SilentlyContinue) {
+    Write-Warning "Git install seems already present. Suggesting to skip install."
+    $do_git = $false
+    $answer = Read-Host "Reinstall anyway? ( y / n )"
+    switch($answer) {
+        Y {
+            $do_git = $true
+        }
+    }
+}
+
 
 # Download directory needs to be present to store the installers.
 if (Test-Path -Path $download_folder) {
@@ -132,17 +181,17 @@ if ($do_pandoc) {
         $pandoc_download_uri = $web_pandoc_download_uri
     }
     if (-not (Test-Path -Path $pandoc_installer)) {
-        Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
+        Get-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
     }
     else {
         $answer = Read-Host "Download exists. Re-download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
-                Download-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
+                Get-Installer -DownloadSource $pandoc_download_uri -DownloadTargetFile $pandoc_installer -DownloadName "Pandoc Portable"
             }
         }
     }
-    Write-Host "Unzipping Pandoc ..." -NoNewline
+    Write-Host "Unzipping Pandoc ... " -NoNewline
     if (-not ($dryrun)) { Expand-Archive -Path $pandoc_installer -DestinationPath $target_pandoc_folder -Force }
     Write-Host "done."
     # Pandoc unzips with a separate folder and that folder must be added
@@ -180,13 +229,13 @@ if ($do_miktex) {
     }
 
     if (-not (Test-Path -Path $miktex_installer)) {
-        Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
+        Get-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
     }
     else {
         $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
         switch ($answer) {
             Y {
-                Download-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
+                Get-Installer -DownloadSource $miktex_download_uri -DownloadTargetFile $miktex_installer -DownloadName "MiKTeX installer"
             }
         }
     }
@@ -209,6 +258,106 @@ if ($do_miktex) {
     }    
 }
 
+if ($do_git) {
+    Write-Host "=====GIT======"
+
+    $web_git_download_uri = Get-LatestDownload -BaseUri $git_base_uri -SearchPattern $git_installer_pattern
+    if (-not ($git_download_uri -eq $web_git_download_uri)) {
+        Write-Warning "Git: Newer version avaiable online: $web_git_download_uri"
+        Write-Host "Git: Script will use that version for download."
+        $git_download_uri = $web_git_download_uri
+    }
+    if (-not (Test-Path -Path $git_installer)) {
+        Get-Installer -DownloadSource $git_download_uri -DownloadTargetFile $git_installer -DownloadName "Git portable"
+    }
+    else {
+        $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
+        switch ($answer) {
+            Y {
+                Get-Installer -DownloadSource $git_download_uri -DownloadTargetFile $git_installer -DownloadName "Visual Studio Code"
+            }
+        }
+    }
+    Write-Host "Installing git as portable version."
+    if (-not ($dryrun)) { Start-Process -FilePath $git_installer -ArgumentList $git_install_params -NoNewWindow -Wait }
+
+    if ($user_path.Contains($target_git_path)) {
+        Write-Warning "Git already in PATH."
+    }
+    else {
+        Write-Host "Will add Git bin to PATH variable and save later."
+        $user_path += ";" + $target_git_path
+        $path_changed = $true
+    }
+    $count_git_in_path = ($user_path.Split(";") | Where-Object {$_ -match "git"}).Count
+    if ($count_git_in_path -gt 1) {
+        Write-Warning "You have Git in your path more than once! Please fix this manually to avoid errors."
+        $user_path.Split(";") | Where-Object {$_ -match "git"} | Write-Warning
+    }    
+}
+
+if ($do_vscode) {
+    Write-Host "====VSCODE===="
+
+    if (-not (Test-Path -Path $vscode_installer)) {
+        Get-Installer -DownloadSource $vscode_download_uri -DownloadTargetFile $vscode_installer -DownloadName "Visual Studio Code"
+    }
+    else {
+        $answer = Read-Host "Download extists. Re-download and overwrite? ( y / n )"
+        switch ($answer) {
+            Y {
+                Get-Installer -DownloadSource $vscode_download_uri -DownloadTargetFile $vscode_installer -DownloadName "Visual Studio Code"
+            }
+        }
+    }
+    Write-Host "Running VS Code install for single user."
+    if (-not ($dryrun)) { Start-Process -FilePath $vscode_installer -ArgumentList $vscode_install_params -NoNewWindow -Wait }
+}
+
+# Optional stuff: XMind
+
+if ($do_xmind) {
+    Write-Host "====XMIND8===="
+
+    # Check if we have the latest download version in our links above.
+    Write-Host "Checking available XMind 8 version online."
+    $web_xmind_download_uri = Get-LatestDownload -BaseUri $xmind_base_uri -SearchPattern $xmind_installer_pattern
+    if (-not ($xmind_download_uri -eq $web_xmind_download_uri)) {
+        Write-Warning "XMind 8: Newer version avaiable online: $web_xmind_download_uri"
+        Write-Host "XMind 8: Script will use that version for download."
+        $xmind_download_uri = $web_xmind_download_uri
+    }
+    if (-not (Test-Path -Path $xmind_installer)) {
+        Get-Installer -DownloadSource $xmind_download_uri -DownloadTargetFile $xmind_installer -DownloadName "XMind 8 Portable"
+    }
+    else {
+        $answer = Read-Host "Download exists. Re-download and overwrite? ( y / n )"
+        switch ($answer) {
+            Y {
+                Get-Installer -DownloadSource $xmind_download_uri -DownloadTargetFile $xmind_installer -DownloadName "XMind 8 Portable"
+            }
+        }
+    }
+    Write-Host "Unzipping XMind 8 ... " -NoNewline
+    if (-not ($dryrun)) { Expand-Archive -Path $xmind_installer -DestinationPath $target_xmind_folder -Force }
+    Write-Host "done."
+
+    # XMind unzips to a separate folder and we want to make a shortcut
+    $xmind_subfolder = Get-ChildItem -Path $target_xmind_folder | Sort-Object -Property LastWriteTime
+    $target_xmind_path = $target_xmind_folder + "\" + $xmind_subfolder[-1].name 
+
+    # Make a shortcut to the start menu of the user
+    $Shell = New-Object -ComObject ("WScript.Shell")
+    $xmind_shortcut = $Shell.CreateShortcut($env:USERPROFILE + "\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\XMind 8.lnk")
+    $xmind_shortcut.TargetPath="$target_xmind_path\xmind.exe"
+    $xmind_shortcut.Arguments=""
+    $xmind_shortcut.WorkingDirectory = "$target_xmind_path";
+    $xmind_shortcut.WindowStyle = 3;
+    $xmind_shortcut.Hotkey = "";
+    $xmind_shortcut.IconLocation = "$target_xmind_path\xmind_file.ico, 0";
+    $xmind_shortcut.Description = "XMind 8";
+    $xmind_shortcut.Save()
+}
 
 # Optional stuff: Python
 if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
@@ -216,16 +365,13 @@ if (-not (Get-Command -Name "python.exe" -ErrorAction SilentlyContinue)) {
     $answer = Read-Host "Do you want to install Python now? ( y / n )"
     switch ($answer) {
         Y {
-            $web_python_dl_page = Invoke-WebRequest -Uri $python_base_uri -UseBasicParsing
-            # python has the same download link twice on the page, hence the filter to unique.
-            $web_python_dl_page_links = $web_python_dl_page.Links.href | Where-Object {$_ -match $python_installer_pattern} | Select-Object -Unique
-            $web_python_download_uri = $web_python_dl_page_links
+            $web_python_download_uri = Get-LatestDownload -BaseUri $python_base_uri -SearchPattern $python_installer_pattern
             if (-not ($python_download_uri -eq $web_python_download_uri)) {
                 Write-Warning "Python: Newer version avaiable online: $web_python_download_uri"
                 Write-Host "Python: Script will use that version for download."
                 $python_download_uri = $web_python_download_uri
             }
-            Download-Installer -DownloadSource $python_download_uri -DownloadTargetFile $python_installer -DownloadName "Python"
+            Get-Installer -DownloadSource $python_download_uri -DownloadTargetFile $python_installer -DownloadName "Python"
             if (-not ($dryrun)) { Start-Process -FilePath $python_installer -ArgumentList $python_install_params -NoNewWindow -Wait }
         }
     }
@@ -239,9 +385,12 @@ if ($path_changed) {
     Write-Host "done."
 }
 
-Write-Host "                   _         _        __  _         _       _                _"
-Write-Host "  ___   ___  _ __ (_) _ __  | |_     / _|(_) _ __  (_) ___ | |__    ___   __| |"
-Write-Host " / __| / __|| '__|| || '_ \ | __|   | |_ | || '_ \ | |/ __|| '_ \  / _ \ / _`` |"
-Write-Host " \__ \| (__ | |   | || |_) || |_    |  _|| || | | || |\__ \| | | ||  __/| (_| |"
-Write-Host " |___/ \___||_|   |_|| .__/  \__|   |_|  |_||_| |_||_||___/|_| |_| \___| \__,_|"
-Write-Host "                     |_|"
+Write-Host ""
+Write-Host "     ___                   "
+Write-Host "    /   \___  _ __   ___   "
+Write-Host "   / /\ / _ \| '_ \ / _ \  "
+Write-Host "  / /_// (_) | | | |  __/_ "
+Write-Host " /___,' \___/|_| |_|\___(_)"
+Write-Host ""
+                       
+
